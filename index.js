@@ -99,22 +99,42 @@ app.put("/movies/:id", async (req, res) => {
     res.status(500).send("Error retrieving movies from DB.");
   }
 });
+//check admin credentials
+const checkAdminToken = (req, res, next) => {
+  const { token } = req.body;
+  if (!token || token !== process.env.ADMIN_TOKEN)
+    return res.status(401).send("Wrong credentials.");
+  next();
+};
 
-app.delete("/movies", async (req, res) => {
-  //destructure the key and the value from the req.body to use them in the SQL statement dynamically
-  const [key, value] = Object.entries(req.body)[0];
+//condition middleware
+const conditionMiddleware = (req, res, next) => {
+  //if there is no body passed with the requset we return a 400 error
+  if (!Object.keys(req.body).length)
+    return res.status(400).send("Please provide a condition with the request.");
+  next();
+};
 
-  try {
-    const { rowCount } = await pool.query(
-      `DELETE FROM movies WHERE ${key} = $1 RETURNING *`,
-      [value]
-    );
-    return res.status(200).send(`Successfully deleted ${rowCount} movies.`);
-  } catch (err) {
-    console.log(err);
-    res.status(500).send("Error retrieving movies from DB.");
+app.delete(
+  "/movies",
+  checkAdminToken,
+  conditionMiddleware,
+  async (req, res) => {
+    //destructure the key and the value from the req.body to use them in the SQL statement dynamically
+    const [key, value] = Object.entries(req.body)[0];
+
+    try {
+      const { rowCount } = await pool.query(
+        `DELETE FROM movies WHERE ${key} = $1 RETURNING *`,
+        [value]
+      );
+      return res.status(200).send(`Successfully deleted ${rowCount} movies.`);
+    } catch (err) {
+      console.log(err);
+      res.status(500).send("Error retrieving movies from DB.");
+    }
   }
-});
+);
 
 //delete one movie from databasebased on the params id value
 app.delete("/movies/:id", async (req, res) => {
