@@ -17,6 +17,8 @@ const getOneMovieById = async (req, res, next) => {
     const { rows } = await pool.query("SELECT * FROM movies WHERE id = $1;", [
       id,
     ]);
+
+    //handle case where no movie was found
     if (!rows.length)
       return res
         .status(404)

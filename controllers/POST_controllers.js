@@ -1,8 +1,9 @@
 const pool = require("../db/client");
 
 const createNewMovie = async (req, res) => {
-  console.log(req.body);
+  //destructure values from request body for create operation in the database
   const { title, director, year } = req.body;
+
   try {
     const { rows } = await pool.query(
       "INSERT INTO movies (title,director,year) VALUES ($1,$2,$3) RETURNING *",

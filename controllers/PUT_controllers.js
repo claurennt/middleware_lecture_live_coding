@@ -1,8 +1,10 @@
 const pool = require("../db/client");
 
 const updateOneMovie = async (req, res) => {
+  //use id parameter to retrieve movie from database that has to be updated
   const { id } = req.params;
 
+  //destructure values from request body for update operation in the database
   const { title, director, year } = req.body;
 
   try {

@@ -18,6 +18,7 @@ const {
 
 const { updateOneMovie } = require("../controllers/PUT_controllers");
 
+const { updateOneFieldOfMovie } = require("../controllers/PATCH_controllers");
 const { createNewMovie } = require("../controllers/POST_controllers");
 
 moviesRouter
@@ -29,6 +30,7 @@ moviesRouter
 moviesRouter
   .route("/:id")
   .get(getOneMovieById)
+  .patch(updateOneFieldOfMovie)
   .put(checkIfReqBodyExists, updateOneMovie)
   .delete(deleteMovieById);
 

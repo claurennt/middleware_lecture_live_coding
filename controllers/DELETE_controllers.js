@@ -9,12 +9,15 @@ const deleteMultipleMovies = async (req, res, next) => {
       `DELETE FROM movies WHERE ${key} = $1 RETURNING *`,
       [value]
     );
+
+    //handle case when no movie was deleted
     if (!rowCount)
       return res
         .status(404)
         .send(
           `we could not find any movie with ${key} = ${value}. No movies deleted.`
         );
+
     return res.status(200).send(`Successfully deleted ${rowCount} movies.`);
   } catch (err) {
     next(err);
@@ -29,10 +32,13 @@ const deleteMovieById = async (req, res, next) => {
       "DELETE FROM movies WHERE id = $1 RETURNING *",
       [id]
     );
+
+    //handle case when no movie was deleted
     if (!rowCount)
       return res
         .status(404)
         .send(`we could not find any movie with id ${id}. No movies deleted.`);
+
     return res
       .status(204)
       .send(`Successfully deleted ${rowCount} movie with id ${id}.`);
