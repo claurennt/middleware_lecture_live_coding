@@ -2,13 +2,19 @@ const express = require("express");
 
 require("dotenv").config();
 
-const pool = require("./db/client");
 const app = express();
 const path = require("path");
+const morgan = require("morgan");
+
+const requestTimeLogger = require("./middlewares/requestTimeLogger");
+const getOnlyMiddleware = require("./middlewares/getOnlyMiddleware");
+const errorHandler = require("./middlewares/errorHandler");
+
+const moviesRouter = require("./routes/moviesRouter");
 
 const port = 3000;
 
-//serve images from public/images folder when path starts with /images
+// app-level middleware to serve images when path is /images/:imageName.imageExtension
 app.use("/images", express.static(path.join(__dirname, "public/images")));
 
 // ### App-level BUILT-IN middleware to parse the body of incoming requests
@@ -16,24 +22,17 @@ app.use(express.urlencoded({ extended: true })); // body parser middleware for h
 
 app.use(express.json()); // body parser middleware for post requests except hmtl forms post requests
 
-const getOnlyMiddleware = (request, response, next) => {
-  if (request.method === "GET") {
-    next(); //goes to next middleware/function in the line if the request is a GET request
-  } else {
-    return response
-      .status(405)
-      .send(
-        `${request.method} request not allowed on path "${request.originalUrl}".`
-      );
-    //return response.sendStatus(403); //returns a 403 forbidden status code if the request is not a GET request
-  }
-};
+app.use(morgan("dev")); // morgan middleware to log requests:::very similar to our custom requestTimeLogger Middleware
+//app.use("/movies", requestTimeLogger);
+
+//binds the getOnlyMiddleware to every request made on path /only-get
 app.use("/only-get", getOnlyMiddleware);
 
 app.get("/only-get", (req, res) =>
   res.status(200).send("Fantastic you have used the correct method!")
 );
 
+<<<<<<< Updated upstream
 const requestTimeLogger = (request, response, next) => {
   console.log(
     `${request.method} ${
@@ -136,19 +135,12 @@ app.delete(
 
 app.delete("/movies/:id", async (req, res) => {
   const { id } = req.params;
+=======
+//binds moviesRouter to every request at path starting with /movies
+app.use("/movies", moviesRouter);
+>>>>>>> Stashed changes
 
-  try {
-    const { rowCount } = await pool.query(
-      "DELETE FROM movies WHERE id = $1 RETURNING *",
-      [id]
-    );
-    return res
-      .status(204)
-      .send(`Successfully deleted ${rowCount} movie with id ${id}.`);
-  } catch (err) {
-    console.log(err);
-    res.status(500).send("Error retrieving movies from DB.");
-  }
-});
+//binds custom error handler to every reqeust made to our app, must be the last one declared in the app-level middleware stack
+app.use(errorHandler);
 
 app.listen(port, () => console.log(`Server is running on port ${port}`));

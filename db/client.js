@@ -10,7 +10,7 @@ const { Pool } = require("pg");
 // });
 
 //better way: with env vars
-//pools will use environment variables for connection information, but they must comply following a naming convention (see .env.SAMPLE)
+//pools will use environment variables for connection information, but they must follow the naming convention (see .env.SAMPLE)
 const pool = new Pool();
 
 module.exports = pool;
